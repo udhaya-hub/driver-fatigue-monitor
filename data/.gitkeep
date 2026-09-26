@@ -1,0 +1,18 @@
+# Data directory
+# Place your training data here following the structure:
+#
+# data/
+#   train.txt          # List of session directories for training
+#   val.txt            # List of session directories for validation
+#   subject_001/
+#     session_001/
+#       frames/
+#         frame_000001.jpg
+#         frame_000002.jpg
+#         ...
+#       annotations.json
+#       physio/
+#         ecg.csv
+#         eda.csv
+#         resp.csv
+#         temp.csv

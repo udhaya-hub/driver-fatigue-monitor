@@ -1,0 +1,117 @@
+# Configuration for Driver Fatigue Monitoring System
+
+# Model Configuration
+model:
+  # Spatial CNN Extractor (for facial frames)
+  cnn:
+    backbone: "efficientnet_b0"  # Options: efficientnet_b0, mobilenet_v3, resnet18
+    pretrained: true
+    freeze_backbone: false
+    output_dim: 256
+    dropout: 0.3
+
+  # Temporal Encoder (LSTM/TCN for time-series)
+  temporal:
+    type: "lstm"  # Options: lstm, gru, tcn
+    input_dim: 256  # CNN output dim + physiological features
+    hidden_dim: 128
+    num_layers: 2
+    bidirectional: true
+    dropout: 0.2
+
+  # Transformer Fusion Layer
+  transformer:
+    d_model: 256
+    nhead: 8
+    num_encoder_layers: 3
+    num_decoder_layers: 3
+    dim_feedforward: 512
+    dropout: 0.1
+    activation: "gelu"
+
+  # Output Heads
+  heads:
+    fatigue_classification:
+      num_classes: 3  # Alert, Drowsy, Fatigued
+      hidden_dims: [128, 64]
+      dropout: 0.3
+    workload_regression:
+      output_dim: 1  # Continuous workload score [0, 1]
+      hidden_dims: [128, 64]
+      dropout: 0.3
+    blink_detection:
+      num_classes: 2  # Blink / No blink
+      hidden_dims: [64, 32]
+      dropout: 0.2
+
+# Vision Processor Configuration
+vision:
+  mediapipe:
+    max_num_faces: 1
+    refine_landmarks: true
+    min_detection_confidence: 0.7
+    min_tracking_confidence: 0.7
+
+  # Facial landmark indices (MediaPipe 468 landmarks)
+  landmarks:
+    left_eye: [33, 160, 158, 133, 153, 144]  # Key points for EAR
+    right_eye: [362, 385, 387, 263, 373, 380]
+    mouth: [61, 84, 17, 314, 405, 320]  # For yawn detection
+    pose: [1, 33, 61, 291, 199]  # Head pose estimation
+
+  # Blink Detection (PERCLOS)
+  perclos:
+    ear_threshold: 0.25
+    consecutive_frames: 3
+    window_size: 60  # Frames for PERCLOS calculation (1 min @ 30fps)
+
+  # Preprocessing
+  preprocessing:
+    target_size: [224, 224]
+    normalize_mean: [0.485, 0.456, 0.406]
+    normalize_std: [0.229, 0.224, 0.225]
+
+# Physiological Signal Configuration
+physiological:
+  sampling_rate: 64  # Hz
+  window_size: 30  # Seconds
+  overlap: 0.5
+  features:
+    - "hrv_time_domain"  # RMSSD, SDNN, pNN50
+    - "hrv_frequency_domain"  # LF, HF, LF/HF ratio
+    - "eda_tonic"  # Skin conductance level
+    - "eda_phasic"  # Skin conductance responses
+    - "respiration_rate"
+    - "temperature"
+
+# Inference Configuration
+inference:
+  device: "auto"  # auto, cpu, cuda, mps
+  batch_size: 1
+  sequence_length: 30  # Frames for temporal modeling
+  confidence_threshold: 0.7
+  smoothing_window: 5  # Temporal smoothing
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  timeout: 30
+  cors_origins:
+    - "http://localhost:8501"
+    - "http://localhost:3000"
+
+# Frontend Configuration
+frontend:
+  type: "streamlit"  # streamlit, react
+  port: 8501
+  theme: "dark"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+  file: "logs/app.log"
+  rotation: "10 MB"
+  retention: "7 days"

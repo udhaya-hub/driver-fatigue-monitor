@@ -1,0 +1,27 @@
+{
+  "0": {
+    "fatigue_state": "alert",
+    "workload": 0.3,
+    "blink": 0
+  },
+  "30": {
+    "fatigue_state": "alert",
+    "workload": 0.35,
+    "blink": 1
+  },
+  "60": {
+    "fatigue_state": "drowsy",
+    "workload": 0.5,
+    "blink": 0
+  },
+  "90": {
+    "fatigue_state": "drowsy",
+    "workload": 0.55,
+    "blink": 1
+  },
+  "120": {
+    "fatigue_state": "fatigued",
+    "workload": 0.8,
+    "blink": 0
+  }
+}
